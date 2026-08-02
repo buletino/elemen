@@ -15,14 +15,13 @@ jobs:
     steps:
       - name: Stiahnutie repozitára
         uses: actions/checkout@v4
-      - name: Stiahni a zmenši obrázky
+      - name: Stiahni obrázky
         run: |
-          mkdir -p obrazky
+          mkdir -p obrazky /tmp/png
           base="https://d8j0ntlcm91z4.cloudfront.net/user_3Efc8WjoJOm0ucmHbvOguU5P18W"
           while read -r id subor; do
             [ -z "$id" ] && continue
-            curl -sf --retry 3 -o /tmp/img.png "$base/$subor"
-            convert /tmp/img.png -resize 460x -quality 82 "obrazky/$id.webp"
+            curl -sf --retry 3 -o "/tmp/png/$id.png" "$base/$subor"
             echo "OK $id"
           done <<'ZOZNAM'
           plamienko hf_20260802_071400_bd3f869e-da3e-428a-a0cd-6f60e034ef46.png
@@ -62,6 +61,20 @@ jobs:
           burkonoh hf_20260802_073606_bfd7d3b2-be5f-4352-8257-0e563fbe15d6.png
           hromokon hf_20260802_073610_e3cac3c8-b3c1-4dcc-b452-2911d4e1fc9e.png
           ZOZNAM
+          ls /tmp/png | wc -l
+      - name: Zmenši na webp (Pillow)
+        run: |
+          pip install --quiet pillow
+          python3 - <<'PY'
+          import os
+          from PIL import Image
+          for f in sorted(os.listdir('/tmp/png')):
+              im = Image.open(f'/tmp/png/{f}').convert('RGB')
+              w = 460
+              h = round(im.height * w / im.width)
+              im.resize((w, h), Image.LANCZOS).save(f"obrazky/{f[:-4]}.webp", 'WEBP', quality=82)
+              print('webp', f)
+          PY
           ls -la obrazky
       - name: Commit obrázkov
         run: |
