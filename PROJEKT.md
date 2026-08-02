@@ -17,6 +17,13 @@ vygenerovať obrázok a doplniť riadok do `.github/workflows/obrazky.yml`,
 ktorý obrázky sťahuje a commitne — obrázkové CDN nie je dostupné z Claude
 prostredia). Emoji každej karty OSTÁVA ako záloha, kým sa obrázok nenačíta
 (`artHTML()` v index.html).
+DÔLEŽITÉ pri generovaní nových obrázkov (poučenie z v13.1): VŽDY poslať ako
+referenčný obrázok schváleného Plamienka (medias role image, job
+bd3f869e-da3e-428a-a0cd-6f60e034ef46) + do promptu „NO frame, NO border,
+NO card shape, NO text, NO hands, NO photo; glow background fills the ENTIRE
+canvas". Bez referencie model vyrába rámiky, text a fotografie. Každý
+vygenerovaný obrázok pred vydaním VIZUÁLNE skontrolovať (Read po stiahnutí
+workflowom na vetve).
 
 ## Kľúčové vlastnosti (stav k v13)
 - **Úrovne (učiaci rebríček):** 1 = súboj + typy (výhoda ×2: oheň>tráva>voda>oheň,
