@@ -85,6 +85,9 @@
   .t-elektro { background:linear-gradient(160deg,#fff2a8,#ffd83f); }
   .emoji { font-size:clamp(30px,9vw,54px); line-height:1; }
   .karta.mala .emoji { font-size:clamp(22px,6vw,34px); }
+  /* obrázok Elemena — kým sa nenačíta, vidno emoji */
+  .artObr { display:block; width:100%; max-height:150px; object-fit:contain; border-radius:6px; margin:0 auto; }
+  .karta.mala .artObr { max-height:72px; }
   .meno { font-weight:bold; font-size:clamp(12px,3vw,16px); margin-top:2px; }
   .karta.mala .meno { font-size:clamp(9px,2.4vw,12px); }
   .typBadge { position:absolute; top:4px; left:4px; font-size:clamp(14px,4vw,20px); }
@@ -322,6 +325,30 @@ const KARTY = {
   vlnobijec: { meno:"Vlnobijec", emoji:"🐋", typ:"voda",   hp:140, stadium:"stage2", evoluujeZ:"kvapkac",  utoky:[{meno:"Vlnobitie",cena:2,dmg:70},{meno:"Cunami",cena:3,dmg:100}] },
   listovec:  { meno:"Lístovec",  emoji:"🦖", typ:"trava",  hp:90,  stadium:"stage1", evoluujeZ:"listko",   utoky:[{meno:"Šľahnutie",cena:1,dmg:30},{meno:"Tŕňový úder",cena:2,dmg:60}] },
   pralesak:  { meno:"Pralesák",  emoji:"🦕", typ:"trava",  hp:130, stadium:"stage2", evoluujeZ:"listovec", utoky:[{meno:"Dupnutie",cena:2,dmg:70},{meno:"Prales",cena:3,dmg:100}] },
+
+  // ---- Lesný tím ----
+  ostrik:    { meno:"Ostrík",    emoji:"🦔", typ:"trava",  hp:70, utoky:[{meno:"Pichnutie",cena:1,dmg:20},{meno:"Tŕňový kotúľ",cena:2,dmg:40}] },
+  kvetko:    { meno:"Kvetko",    emoji:"🐛", typ:"trava",  hp:50, utoky:[{meno:"Zahryznutie",cena:1,dmg:20},{meno:"Lepkavá niť",cena:2,dmg:40}] },
+  svetluska: { meno:"Svetluška", emoji:"🪲", typ:"elektro",hp:50, utoky:[{meno:"Zablikanie",cena:1,dmg:20},{meno:"Svetelný lúč",cena:2,dmg:40}] },
+  potapko:   { meno:"Potápko",   emoji:"🦆", typ:"voda",   hp:60, utoky:[{meno:"Čľupnutie",cena:1,dmg:20},{meno:"Vodný gejzír",cena:2,dmg:40}] },
+  zeravik:   { meno:"Žeravík",   emoji:"🐍", typ:"ohen",   hp:60, utoky:[{meno:"Horúce uštipnutie",cena:1,dmg:20},{meno:"Žeravé zovretie",cena:2,dmg:40}] },
+
+  // ---- Ľadový tím ----
+  mrazik:    { meno:"Mrazík",    emoji:"🐧", typ:"voda",   hp:60, utoky:[{meno:"Kĺzačka",cena:1,dmg:20},{meno:"Ľadová strela",cena:2,dmg:40}] },
+  machko:    { meno:"Machko",    emoji:"🐨", typ:"trava",  hp:70, utoky:[{meno:"Objatie",cena:1,dmg:20},{meno:"Listová clona",cena:2,dmg:40}] },
+  ohnivko:   { meno:"Ohnivko",   emoji:"🦀", typ:"ohen",   hp:60, utoky:[{meno:"Štipnutie",cena:1,dmg:20},{meno:"Horúce klepetá",cena:2,dmg:40}] },
+  bleskonoh: { meno:"Bleskonoh", emoji:"🦓", typ:"elektro",hp:60, utoky:[{meno:"Kopnutie",cena:1,dmg:20},{meno:"Bleskový šprint",cena:2,dmg:40}] },
+  vlnka:     { meno:"Vlnka",     emoji:"🐬", typ:"voda",   hp:70, utoky:[{meno:"Plutvička",cena:1,dmg:20},{meno:"Skok cez vlnu",cena:2,dmg:40}] },
+
+  // ---- Evolúcie nových tímov ----
+  motylik:    { meno:"Motýlik",    emoji:"🦋", typ:"trava",  hp:90,  stadium:"stage1", evoluujeZ:"kvetko",    utoky:[{meno:"Peľový poprašok",cena:1,dmg:30},{meno:"Vzdušný vír",cena:2,dmg:60}] },
+  kridlokvet: { meno:"Krídlokvet", emoji:"🦚", typ:"trava",  hp:130, stadium:"stage2", evoluujeZ:"motylik",   utoky:[{meno:"Kvetinová búrka",cena:2,dmg:70},{meno:"Dúhový víchor",cena:3,dmg:100}] },
+  blyskotak:  { meno:"Blyskoták",  emoji:"🦉", typ:"elektro",hp:80,  stadium:"stage1", evoluujeZ:"svetluska", utoky:[{meno:"Nočný nálet",cena:1,dmg:30},{meno:"Elektrické krídla",cena:2,dmg:60}] },
+  burkokridlo:{ meno:"Búrkokrídlo",emoji:"🦇", typ:"elektro",hp:120, stadium:"stage2", evoluujeZ:"blyskotak", utoky:[{meno:"Temný blesk",cena:2,dmg:70},{meno:"Búrková víchrica",cena:3,dmg:100}] },
+  ladovec:    { meno:"Ľadovec",    emoji:"🦭", typ:"voda",   hp:100, stadium:"stage1", evoluujeZ:"mrazik",    utoky:[{meno:"Ľadové plesknutie",cena:1,dmg:30},{meno:"Mrazivý prúd",cena:2,dmg:60}] },
+  mrazivec:   { meno:"Mrazivec",   emoji:"🐻‍❄️", typ:"voda", hp:140, stadium:"stage2", evoluujeZ:"ladovec",   utoky:[{meno:"Snehová lavína",cena:2,dmg:70},{meno:"Polárna búrka",cena:3,dmg:100}] },
+  burkonoh:   { meno:"Búrkonoh",   emoji:"🐎", typ:"elektro",hp:90,  stadium:"stage1", evoluujeZ:"bleskonoh", utoky:[{meno:"Hromové kopyto",cena:1,dmg:30},{meno:"Bleskový cval",cena:2,dmg:60}] },
+  hromokon:   { meno:"Hromokôň",   emoji:"🦄", typ:"elektro",hp:120, stadium:"stage2", evoluujeZ:"burkonoh",  utoky:[{meno:"Rohový blesk",cena:2,dmg:70},{meno:"Hromová žiara",cena:3,dmg:100}] },
 };
 
 // Trainer karty (Úroveň 3)
@@ -340,6 +367,10 @@ const DECKS = {
               l3:["ohnivec","ohnodrak","iskrak","hromoborec", ...TRENERI_BALIK] },
   oceansky: { nazov:"Oceánsky tím", emoji:"🌊", karty:["kvapko","zabko","listko","burko","uhlik"],
               l3:["kvapkac","vlnobijec","listovec","pralesak", ...TRENERI_BALIK] },
+  lesny:    { nazov:"Lesný tím", emoji:"🌳", karty:["ostrik","kvetko","svetluska","potapko","zeravik"],
+              l3:["motylik","kridlokvet","blyskotak","burkokridlo", ...TRENERI_BALIK] },
+  ladovy:   { nazov:"Ľadový tím", emoji:"❄️", karty:["mrazik","machko","ohnivko","bleskonoh","vlnka"],
+              l3:["ladovec","mrazivec","burkonoh","hromokon", ...TRENERI_BALIK] },
 };
 
 const HELP = {
@@ -640,7 +671,7 @@ function vyberStartOverlay(index){
   document.getElementById('setupVyber').innerHTML = `<div class="vyberZoznamBox">` + h.tim.map((c,i)=>{
     return `<div class="karta mala t-${c.def.typ} vyberatelna" onclick="zvolStart(${index},${i})">
       <div class="typBadge">${TYP_EMOJI[c.def.typ]}</div>
-      <div class="emoji">${c.def.emoji}</div>
+      ${artHTML(c)}
       <div class="meno">${c.def.meno}</div>
       <div class="hpText">❤️ ${c.def.hp}</div></div>`;
   }).join("") + `</div>`;
@@ -694,6 +725,14 @@ function zive(hrac){ return hrac.tim.filter(c=>c.zive); }
 function aktiv(hrac){ return hrac.tim[hrac.aktivnyIndex]; }
 
 /* ================= VYKRESLENIE ================= */
+function artHTML(inst){
+  // obrázok Elemena; keď sa načíta, schová emoji — keď chýba, ostane emoji
+  const kid = idKarty(inst.def);
+  if(!kid) return `<span class="emoji">${inst.def.emoji}</span>`;
+  return `<span class="emoji">${inst.def.emoji}</span><img class="artObr" src="obrazky/${kid}.webp" alt=""
+    loading="lazy" onload="this.previousElementSibling.style.display='none'" onerror="this.remove()">`;
+}
+
 function kartaHTML(inst, velka){
   const t = inst.def.typ;
   const pct = Math.max(0, Math.round(inst.hp / inst.def.hp * 100));
@@ -703,7 +742,7 @@ function kartaHTML(inst, velka){
     // malá karta (lavička)
     return `<div class="karta mala t-${t} ${inst.zive?'':'mrtva'}">
       <div class="typBadge">${TYP_EMOJI[t]}</div>
-      <div class="emoji">${inst.def.emoji}</div>
+      ${artHTML(inst)}
       <div class="meno">${inst.def.meno}</div>
       <div class="hpText">❤️ ${Math.max(0,inst.hp)}/${inst.def.hp}</div>
       <div class="hpBar"><div style="width:${pct}%;background:${barColor}"></div></div>
@@ -726,7 +765,7 @@ function kartaHTML(inst, velka){
     </div>
     <div class="kartaArt">
       <span class="typBadge">${TYP_EMOJI[t]}</span>
-      <span class="emoji">${inst.def.emoji}</span>
+      ${artHTML(inst)}
     </div>
     <div class="hpBar"><div style="width:${pct}%;background:${barColor}"></div></div>
     ${en}

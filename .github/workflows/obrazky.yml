@@ -1,0 +1,72 @@
+# Jednorazový (opakovateľný) workflow: stiahne vygenerované obrázky Elemenov,
+# zmenší ich na šírku 460 px, uloží ako webp do priečinka obrazky/ a commitne.
+# Spúšťa sa ručne (workflow_dispatch) na vetve, na ktorej má obrázky commitnúť.
+name: Stiahnutie obrázkov Elemenov
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  stiahnut:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Stiahnutie repozitára
+        uses: actions/checkout@v4
+      - name: Stiahni a zmenši obrázky
+        run: |
+          mkdir -p obrazky
+          base="https://d8j0ntlcm91z4.cloudfront.net/user_3Efc8WjoJOm0ucmHbvOguU5P18W"
+          while read -r id subor; do
+            [ -z "$id" ] && continue
+            curl -sf --retry 3 -o /tmp/img.png "$base/$subor"
+            convert /tmp/img.png -resize 460x -quality 82 "obrazky/$id.webp"
+            echo "OK $id"
+          done <<'ZOZNAM'
+          plamienko hf_20260802_071400_bd3f869e-da3e-428a-a0cd-6f60e034ef46.png
+          kvapko hf_20260802_071411_b4860f41-e656-4967-b99b-63dd3be35f5c.png
+          ohnodrak hf_20260802_071416_65c11120-0736-47a4-8fad-a4405ed8e052.png
+          sopusik hf_20260802_072510_ecd8d140-27d1-4c28-9187-aae2a54ac188.png
+          uhlik hf_20260802_072517_a47e9071-9f71-4402-ab14-dd5a157d4db8.png
+          zabko hf_20260802_072610_f2012125-f64a-453c-95b5-a23b4a871ca9.png
+          perlik hf_20260802_072738_43e62836-0ab3-44fa-94e9-d74650b6433f.png
+          listko hf_20260802_072743_0ab41f04-5233-4f0c-adfd-c9e9e48cffc9.png
+          hribik hf_20260802_072807_cb26b0e9-6d6d-4836-bc31-a4e798679ad6.png
+          iskrik hf_20260802_072901_362f4e8a-61bf-4622-bd26-35a7eed90fdb.png
+          burko hf_20260802_072909_2a820607-1c95-4289-916c-c14173d1f606.png
+          ohnivec hf_20260802_073105_1b453b5d-b6ee-4733-8cbe-f34bb483f749.png
+          iskrak hf_20260802_073113_b7ee8cb0-2bed-496e-9593-3c9c259f6b69.png
+          hromoborec hf_20260802_073127_a9fd3689-e8ac-4bb7-8010-9e86a9a465ae.png
+          kvapkac hf_20260802_073135_42b980f8-c101-4c59-b291-187a87bd72cb.png
+          vlnobijec hf_20260802_073149_7fa703f0-cf26-4112-8bad-26262430c91a.png
+          listovec hf_20260802_073154_6089570a-027c-47dc-a8a2-bfe18ee414db.png
+          pralesak hf_20260802_073201_37ca3138-b28c-4656-9111-7c27e4a2df6b.png
+          ostrik hf_20260802_073205_b15aeef7-b30c-4f3b-91ec-46db9f11cd8c.png
+          svetluska hf_20260802_073213_42b1a712-335f-4d69-8607-e9ccd1faf171.png
+          kvetko hf_20260802_073233_eea2e962-2904-4b4c-a7cd-bef4f8489dd0.png
+          potapko hf_20260802_073238_9341ad53-0aeb-4256-93da-5c7ba7def4a7.png
+          zeravik hf_20260802_073241_72eba7db-4946-4978-bf0e-0780a1ae562e.png
+          mrazik hf_20260802_073349_f52c49ff-861c-4cb4-8099-40101d76f9af.png
+          machko hf_20260802_073354_354c2673-2766-46b7-828d-535518cc0bbc.png
+          ohnivko hf_20260802_073358_bd5127f7-4775-4df6-b2d2-ffbe33ee4083.png
+          bleskonoh hf_20260802_073442_e1e2c2a1-3a65-490a-abc2-b94d06c9a3b5.png
+          vlnka hf_20260802_073447_bace7c64-cb12-4feb-94f6-3521930db989.png
+          motylik hf_20260802_073455_13ea5e47-9c19-45d4-8302-7414ebf96511.png
+          kridlokvet hf_20260802_073514_3b8cd971-d557-4b97-ab76-0429bdba00db.png
+          blyskotak hf_20260802_073521_b6c3138c-d121-4756-89cb-bbdf384ea571.png
+          burkokridlo hf_20260802_073533_eaa01e4b-a761-43a0-9367-e28e5a92db63.png
+          ladovec hf_20260802_073552_6c95decb-8e65-496a-b773-0afc9ddd8715.png
+          mrazivec hf_20260802_073601_8dd3d40b-d4ba-41aa-8080-80dde961d03c.png
+          burkonoh hf_20260802_073606_bfd7d3b2-be5f-4352-8257-0e563fbe15d6.png
+          hromokon hf_20260802_073610_e3cac3c8-b3c1-4dcc-b452-2911d4e1fc9e.png
+          ZOZNAM
+          ls -la obrazky
+      - name: Commit obrázkov
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add obrazky
+          git commit -m "Obrázky Elemenov (webp, 36 ks)" || { echo "žiadna zmena"; exit 0; }
+          git push
