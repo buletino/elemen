@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ELEMEN – kartová hra o súboji živlov</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html,body { margin:0; padding:0; height:100%; }
+  body {
+    font-family: "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif;
+    background: linear-gradient(160deg,#2b3f87,#5b3fa8 60%,#8a3fa8);
+    color:#fff; user-select:none; -webkit-user-select:none;
+    touch-action: manipulation; overflow:hidden;
+  }
+  .obrazovka { position:absolute; inset:0; display:flex; flex-direction:column; }
+  .skryte { display:none !important; }
+
+  /* ---------- MENU ---------- */
+  #menu { align-items:center; justify-content:center; text-align:center; padding:16px; overflow:auto; }
+  #menu h1 { font-size: clamp(28px,7vw,54px); margin:6px 0; text-shadow:2px 3px 0 #0004; }
+  #menu .podnadpis { font-size: clamp(14px,3.4vw,20px); opacity:.9; margin-bottom:18px; }
+  .karta-menu { background:#ffffff18; border:3px solid #ffffff44; border-radius:22px; padding:14px 16px; margin:8px; width:min(560px,94vw); }
+  .karta-menu .titulok { font-size:clamp(16px,3.6vw,22px); font-weight:bold; margin-bottom:10px; display:flex; align-items:center; justify-content:center; gap:8px;}
+  .prep { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+  .volba { flex:1 1 140px; min-width:120px; background:#ffffff22; border:3px solid transparent; border-radius:16px; padding:12px 8px; font-size:clamp(14px,3.4vw,18px); cursor:pointer; color:#fff; text-align:center; }
+  .volba.aktiv { background:#ffd23f; color:#3a2a00; border-color:#fff; font-weight:bold; }
+  .velke-tlacidlo {
+    display:inline-flex; align-items:center; justify-content:center; gap:10px;
+    background:#ffd23f; color:#3a2a00; border:none; border-radius:22px;
+    font-size:clamp(20px,5vw,30px); font-weight:bold; padding:16px 30px; margin-top:14px;
+    cursor:pointer; box-shadow:0 6px 0 #b98a00; font-family:inherit;
+  }
+  .velke-tlacidlo:active { transform:translateY(4px); box-shadow:0 2px 0 #b98a00; }
+
+  /* ---------- STÔL ---------- */
+  #stol { padding:6px 8px 8px; }
+  #hornaLista { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:4px 6px; }
+  #kdoNaTahu { font-size:clamp(15px,4vw,22px); font-weight:bold; padding:6px 12px; border-radius:14px; background:#0003; }
+  #hornaLista .ikony { display:flex; gap:6px; }
+  .ikonaBtn { width:44px; height:44px; border-radius:50%; border:none; background:#ffffff30; color:#fff; font-size:22px; cursor:pointer; font-family:inherit; }
+  .ikonaBtn:active { background:#ffffff55; }
+
+  #superArea, #mojaArea { display:flex; align-items:center; gap:8px; padding:6px; border-radius:16px; }
+  #superArea { background:#ff5a6e22; }
+  #mojaArea { background:#4fd1c522; }
+  .stitok { font-size:clamp(11px,2.6vw,14px); opacity:.85; writing-mode:vertical-rl; text-orientation:upright; letter-spacing:1px; }
+
+  .lavicka { display:flex; gap:5px; flex-wrap:wrap; flex:1; }
+  .aktivnyObal { display:flex; flex-direction:column; align-items:center; }
+
+  /* karty */
+  .karta { border-radius:14px; padding:6px; text-align:center; position:relative; color:#222; box-shadow:0 3px 6px #0004; }
+  .karta.velka { width:clamp(130px,34vw,180px); }
+  .karta.mala { width:clamp(64px,16vw,88px); padding:4px; }
+  .karta.mrtva { opacity:.35; filter:grayscale(1); }
+  .karta.vyberatelna { cursor:pointer; outline:4px solid #ffd23f; animation:puls 1s infinite; }
+  @keyframes puls { 50%{ outline-color:#fff;} }
+  .t-ohen { background:linear-gradient(160deg,#ffd9a8,#ff9a5b); }
+  .t-voda { background:linear-gradient(160deg,#aee3ff,#5bb8ff); }
+  .t-trava { background:linear-gradient(160deg,#c8f5b0,#78d95b); }
+  .t-elektro { background:linear-gradient(160deg,#fff2a8,#ffd83f); }
+  .emoji { font-size:clamp(30px,9vw,54px); line-height:1; }
+  .karta.mala .emoji { font-size:clamp(22px,6vw,34px); }
+  .meno { font-weight:bold; font-size:clamp(12px,3vw,16px); margin-top:2px; }
+  .karta.mala .meno { font-size:clamp(9px,2.4vw,12px); }
+  .typBadge { position:absolute; top:4px; left:4px; font-size:clamp(14px,4vw,20px); }
+  .hpText { font-size:clamp(11px,2.8vw,14px); font-weight:bold; margin-top:3px; }
+  .hpBar { height:9px; border-radius:6px; background:#0002; overflow:hidden; margin-top:2px; }
+  .hpBar > div { height:100%; background:#38b000; transition:width .35s; }
+  .energia { font-size:clamp(11px,3vw,15px); margin-top:2px; min-height:16px; }
+
+  #sprava { display:flex; align-items:center; gap:8px; background:#0003; border-radius:14px; padding:8px 10px; margin:6px 0; min-height:46px; }
+  #spravaText { flex:1; font-size:clamp(13px,3.4vw,18px); }
+
+  #akcie { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; padding-top:2px; }
+  .akcia {
+    display:flex; align-items:center; gap:8px; background:#ffd23f; color:#3a2a00;
+    border:none; border-radius:16px; font-size:clamp(15px,3.8vw,20px); font-weight:bold;
+    padding:12px 16px; cursor:pointer; box-shadow:0 5px 0 #b98a00; font-family:inherit;
+  }
+  .akcia:active { transform:translateY(3px); box-shadow:0 2px 0 #b98a00; }
+  .akcia.modra { background:#5bb8ff; color:#08324f; box-shadow:0 5px 0 #2b7fbf; }
+  .akcia.siva { background:#c9c9c9; color:#666; box-shadow:0 5px 0 #999; }
+  .akciaRiadok { display:flex; align-items:center; gap:6px; }
+  .qBtn { width:44px; height:44px; border-radius:50%; border:none; background:#ffffff30; color:#fff; font-size:22px; cursor:pointer; font-family:inherit; flex:0 0 auto; }
+  .qBtn:active { background:#ffffff66; }
+  .cakaj { font-size:clamp(16px,4vw,22px); padding:14px; opacity:.9; }
+
+  /* ruka (Úroveň 3) */
+  #ruka { background:#ffd23f22; border-radius:14px; padding:6px 8px; margin:6px 0; }
+  #ruka .rukaHlavicka { display:flex; align-items:center; gap:6px; font-size:clamp(12px,3vw,15px); margin-bottom:4px; opacity:.95; }
+  #ruka .rukaKarty { display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; }
+  .rukaKarta { flex:0 0 auto; width:clamp(76px,19vw,100px); border-radius:12px; padding:6px 4px; text-align:center; color:#222; cursor:pointer; box-shadow:0 3px 5px #0004; position:relative; }
+  .rukaKarta:active { transform:translateY(2px); }
+  .rukaKarta.trainer { background:linear-gradient(160deg,#e8d5ff,#c8a8ff); }
+  .rukaKarta .rEmoji { font-size:clamp(26px,7vw,38px); line-height:1; }
+  .rukaKarta .rMeno { font-weight:bold; font-size:clamp(10px,2.6vw,13px); }
+  .rukaKarta .rPop { font-size:clamp(8px,2.2vw,10px); line-height:1.1; }
+  .rukaKarta .rStadium { font-size:clamp(8px,2.2vw,10px); opacity:.8; }
+  .rukaKarta .rQ { position:absolute; top:2px; right:2px; background:#0002; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:13px; }
+
+  /* ---------- OVERLAYE ---------- */
+  .overlay { position:absolute; inset:0; background:#000a; display:flex; align-items:center; justify-content:center; padding:18px; z-index:10; }
+  .okno { background:#2b2b45; border:4px solid #ffd23f; border-radius:22px; padding:22px; max-width:min(560px,94vw); text-align:center; }
+  .okno .velkyEmoji { font-size:clamp(48px,16vw,90px); }
+  .okno p { font-size:clamp(16px,4.2vw,22px); line-height:1.4; }
+  .okno .riadok { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:10px; }
+  #vyberZoznam { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:12px; }
+</style>
+</head>
+<body>
+
+<!-- MENU -->
+<div id="menu" class="obrazovka">
+  <h1>⚔️ ELEMEN 🐉</h1>
+  <div class="podnadpis">Kartová hra o súboji živlov – nauč sa hrať!</div>
+
+  <div class="karta-menu">
+    <div class="titulok">📚 Úroveň (ťažkosť)
+      <button class="ikonaBtn" onclick="napoveda(HELP.urovne)">❓</button></div>
+    <div class="prep">
+      <div class="volba aktiv" data-uroven="1" onclick="vyberUroven(1)">1 – Súboj<br><small>len útoky a typy</small></div>
+      <div class="volba" data-uroven="2" onclick="vyberUroven(2)">2 – Energie<br><small>+ energia a lavička</small></div>
+      <div class="volba" data-uroven="3" onclick="vyberUroven(3)">3 – Evolúcie<br><small>+ vývoj a Trainer karty</small></div>
+    </div>
+  </div>
+
+  <div class="karta-menu">
+    <div class="titulok">👥 Kto hrá
+      <button class="ikonaBtn" onclick="napoveda(HELP.rezim)">❓</button></div>
+    <div class="prep">
+      <div class="volba aktiv" data-rezim="2hraci" onclick="vyberRezim('2hraci')">👦👧 Dvaja hráči</div>
+      <div class="volba" data-rezim="pocitac" onclick="vyberRezim('pocitac')">🧒🤖 Proti počítaču</div>
+    </div>
+  </div>
+
+  <button class="velke-tlacidlo" onclick="spustiHru()">▶️ Hrať</button>
+  <div>
+    <button class="velke-tlacidlo" style="font-size:clamp(16px,4vw,22px);padding:12px 20px;background:#5bb8ff;color:#08324f;box-shadow:0 6px 0 #2b7fbf" onclick="akoSaHra()">❓ Ako sa hrá</button>
+    <button class="velke-tlacidlo" style="font-size:clamp(16px,4vw,22px);padding:12px 20px;background:#c8a8ff;color:#2a1a4a;box-shadow:0 6px 0 #8a6fbf" onclick="otvorHlas()">🔈 Hlas</button>
+  </div>
+</div>
+
+<!-- STÔL -->
+<div id="stol" class="obrazovka skryte">
+  <div id="hornaLista">
+    <div id="kdoNaTahu">–</div>
+    <div class="ikony">
+      <button class="ikonaBtn" onclick="otvorHlas()">🔈</button>
+      <button class="ikonaBtn" onclick="akoSaHra()">❓</button>
+      <button class="ikonaBtn" onclick="domov()">🏠</button>
+    </div>
+  </div>
+  <div id="superArea"></div>
+  <div id="sprava"><span id="spravaText"></span>
+    <button class="ikonaBtn" onclick="zopakuj()">🔊</button></div>
+  <div id="mojaArea"></div>
+  <div id="ruka" class="skryte"></div>
+  <div id="akcie"></div>
+</div>
+
+<!-- PASS -->
+<div id="pass" class="overlay skryte"><div class="okno">
+  <div class="velkyEmoji">🙈➡️</div>
+  <p id="passText"></p>
+  <button class="velke-tlacidlo" onclick="passHotovo()">✅ Som pripravený</button>
+</div></div>
+
+<!-- VYBER -->
+<div id="vyber" class="overlay skryte"><div class="okno">
+  <div class="velkyEmoji">😵</div>
+  <p id="vyberText"></p>
+  <div id="vyberZoznam"></div>
+</div></div>
+
+<!-- MODAL / NAPOVEDA -->
+<div id="modal" class="overlay skryte"><div class="okno">
+  <div class="velkyEmoji">💡</div>
+  <p id="modalText"></p>
+  <div class="riadok">
+    <button class="akcia modra" onclick="zopakujModal()">🔊 Prečítať</button>
+    <button class="akcia" onclick="zavriModal()">✅ Rozumiem</button>
+  </div>
+</div></div>
+
+<!-- HLAS -->
+<div id="hlas" class="overlay skryte"><div class="okno">
+  <div class="velkyEmoji">🔈</div>
+  <p style="margin:4px 0">Vyber hlas a výslovnosť</p>
+  <select id="hlasSelect" onchange="nastavHlasZoSelectu()"
+    style="width:100%;font-size:16px;padding:10px;border-radius:12px;border:2px solid #ffd23f;background:#1e1e33;color:#fff;font-family:inherit"></select>
+  <p style="margin:12px 0 4px 0;font-size:16px">Rýchlosť čítania:</p>
+  <div class="prep">
+    <div class="volba" data-rych="0.8" onclick="nastavRychlost(0.8)">🐢 Pomaly</div>
+    <div class="volba aktiv" data-rych="0.95" onclick="nastavRychlost(0.95)">🙂 Normálne</div>
+    <div class="volba" data-rych="1.15" onclick="nastavRychlost(1.15)">🐇 Rýchlo</div>
+  </div>
+  <div class="riadok">
+    <button class="akcia modra" onclick="skusHlas()">🔊 Skús hlas</button>
+    <button class="akcia" onclick="zavriHlas()">✅ Hotovo</button>
+  </div>
+  <p style="font-size:13px;opacity:.8;margin-top:8px">Ak tu nie je slovenský hlas, v tablete ho vieš doinštalovať v nastaveniach (Reč / Text-to-Speech).</p>
+</div></div>
+
+<!-- VITAZ -->
+<div id="vitaz" class="overlay skryte"><div class="okno">
+  <div class="velkyEmoji">🏆</div>
+  <p id="vitazText"></p>
+  <div class="riadok">
+    <button class="velke-tlacidlo" onclick="spustiHru()">🔁 Hrať znova</button>
+    <button class="velke-tlacidlo modra" style="background:#5bb8ff;color:#08324f;box-shadow:0 6px 0 #2b7fbf" onclick="domov()">🏠 Menu</button>
+  </div>
+</div></div>
+
+<script>
+/* ================= DÁTA ================= */
+const TYP_EMOJI = { ohen:"🔥", voda:"💧", trava:"🌿", elektro:"⚡" };
+const TYP_NAZOV = { ohen:"Oheň", voda:"Voda", trava:"Tráva", elektro:"Elektro" };
+// kto koho poráža (výhoda = dvojnásobné zranenie)
+const SILNY = { ohen:["trava"], trava:["voda"], voda:["ohen"], elektro:["voda"] };
+
+const KARTY = {
+  plamienko:{ meno:"Plamienko", emoji:"🦊", typ:"ohen",  hp:60, utoky:[{meno:"Iskra",cena:1,dmg:20},{meno:"Ohnivý dych",cena:2,dmg:40}] },
+  sopusik:  { meno:"Sopúšik",   emoji:"🐲", typ:"ohen",  hp:80, utoky:[{meno:"Škrabanec",cena:1,dmg:20},{meno:"Láva",cena:2,dmg:50}] },
+  uhlik:    { meno:"Uhlík",     emoji:"🐦‍🔥", typ:"ohen", hp:60, utoky:[{meno:"Zobák",cena:1,dmg:20},{meno:"Plameň",cena:2,dmg:40}] },
+  kvapko:   { meno:"Kvapko",    emoji:"🐢", typ:"voda",  hp:70, utoky:[{meno:"Striek",cena:1,dmg:20},{meno:"Vlna",cena:2,dmg:40}] },
+  zabko:    { meno:"Žabko",     emoji:"🐸", typ:"voda",  hp:60, utoky:[{meno:"Skok",cena:1,dmg:20},{meno:"Jazyk",cena:2,dmg:40}] },
+  perlik:   { meno:"Perlík",    emoji:"🐙", typ:"voda",  hp:70, utoky:[{meno:"Chápadlo",cena:1,dmg:20},{meno:"Príval",cena:2,dmg:40}] },
+  listko:   { meno:"Lístko",    emoji:"🦎", typ:"trava", hp:60, utoky:[{meno:"Úder listom",cena:1,dmg:20},{meno:"Bodliak",cena:2,dmg:40}] },
+  hribik:   { meno:"Hríbik",    emoji:"🍄", typ:"trava", hp:70, utoky:[{meno:"Výtrus",cena:1,dmg:20},{meno:"Korene",cena:2,dmg:40}] },
+  iskrik:   { meno:"Iskrík",    emoji:"🐭", typ:"elektro",hp:50, utoky:[{meno:"Iskrička",cena:1,dmg:20},{meno:"Blesk",cena:2,dmg:40}] },
+  burko:    { meno:"Búrko",     emoji:"🦅", typ:"elektro",hp:70, utoky:[{meno:"Krídlo",cena:1,dmg:20},{meno:"Hrom",cena:2,dmg:50}] },
+
+  // ---- Evolúcie (Úroveň 3): 1. a 2. štádium ----
+  ohnivec:   { meno:"Ohnivec",   emoji:"🐺", typ:"ohen",   hp:90,  stadium:"stage1", evoluujeZ:"plamienko", utoky:[{meno:"Zahryznutie",cena:1,dmg:30},{meno:"Ohnivý pazúr",cena:2,dmg:60}] },
+  ohnodrak:  { meno:"Ohňodrak",  emoji:"🐉", typ:"ohen",   hp:130, stadium:"stage2", evoluujeZ:"ohnivec",   utoky:[{meno:"Spálenie",cena:2,dmg:70},{meno:"Ohnivá búrka",cena:3,dmg:100}] },
+  iskrak:    { meno:"Iskrák",    emoji:"🐹", typ:"elektro", hp:80, stadium:"stage1", evoluujeZ:"iskrik",   utoky:[{meno:"Zaiskrenie",cena:1,dmg:30},{meno:"Výboj",cena:2,dmg:60}] },
+  hromoborec:{ meno:"Hromoborec",emoji:"🦁", typ:"elektro", hp:120,stadium:"stage2", evoluujeZ:"iskrak",   utoky:[{meno:"Úder blesku",cena:2,dmg:70},{meno:"Hromobitie",cena:3,dmg:100}] },
+  kvapkac:   { meno:"Kvapkáč",   emoji:"🐊", typ:"voda",   hp:100, stadium:"stage1", evoluujeZ:"kvapko",   utoky:[{meno:"Zahryznutie",cena:1,dmg:30},{meno:"Vodný trysk",cena:2,dmg:60}] },
+  vlnobijec: { meno:"Vlnobijec", emoji:"🐋", typ:"voda",   hp:140, stadium:"stage2", evoluujeZ:"kvapkac",  utoky:[{meno:"Vlnobitie",cena:2,dmg:70},{meno:"Cunami",cena:3,dmg:100}] },
+  listovec:  { meno:"Lístovec",  emoji:"🦖", typ:"trava",  hp:90,  stadium:"stage1", evoluujeZ:"listko",   utoky:[{meno:"Šľahnutie",cena:1,dmg:30},{meno:"Tŕňový úder",cena:2,dmg:60}] },
+  pralesak:  { meno:"Pralesák",  emoji:"🦕", typ:"trava",  hp:130, stadium:"stage2", evoluujeZ:"listovec", utoky:[{meno:"Dupnutie",cena:2,dmg:70},{meno:"Prales",cena:3,dmg:100}] },
+};
+
+// Trainer karty (Úroveň 3)
+const TRAINERI = {
+  lekarnicka:  { meno:"Lekárnička",   emoji:"🩹", druh:"trainer", efekt:"liec30",   popis:"Vylieč 30 života svojmu aktívnemu Elemenovi." },
+  profesorka:  { meno:"Profesorka",   emoji:"👩‍🔬", druh:"trainer", efekt:"naber2",  popis:"Naber si 2 nové karty do ruky." },
+  odvolanie:   { meno:"Odvolanie",    emoji:"🔄", druh:"trainer", efekt:"vymen",    popis:"Vymeň si aktívneho Elemena za jedného z lavičky zadarmo." },
+  superenergia:{ meno:"Super energia",emoji:"🔋", druh:"trainer", efekt:"energia1", popis:"Pripoj svojmu aktívnemu Elemenovi 1 energiu navyše." },
+};
+function defKarty(id){ return KARTY[id] || TRAINERI[id]; }
+
+const DECKS = {
+  sopecny:  { nazov:"Sopečný tím", emoji:"🌋", karty:["plamienko","sopusik","hribik","iskrik","perlik"],
+              l3:["ohnivec","ohnodrak","iskrak","hromoborec","lekarnicka","profesorka","odvolanie","superenergia"] },
+  oceansky: { nazov:"Oceánsky tím", emoji:"🌊", karty:["kvapko","zabko","listko","burko","uhlik"],
+              l3:["kvapkac","vlnobijec","listovec","pralesak","lekarnicka","profesorka","odvolanie","superenergia"] },
+};
+
+const HELP = {
+  urovne:"Úroveň jeden je najľahšia: len útoky a typy. Úroveň dva pridáva energiu a lavičku. Úroveň tri pridáva evolúcie a Trainer karty. Začnite úrovňou jeden a postupujte vyššie.",
+  rezim:"Môžete hrať dvaja proti sebe na jednom tablete, alebo sám proti počítaču a trénovať.",
+  typy:"Každý Elemen má svoj typ. Oheň porazí trávu. Tráva porazí vodu. Voda porazí oheň. Elektro porazí vodu. Keď útočíš výhodným typom, spôsobíš dvojnásobné zranenie!",
+  hp:"HP je životná sila Elemena. Keď klesne na nulu, Elemen omdlie a odchádza z hry.",
+  energia:"Energia je potrebná na útoky. Každé kolo môžeš pripojiť jednu energiu svojmu Elemenovi. Silnejšie útoky potrebujú viac energie.",
+  vymena:"Môžeš vymeniť svojho aktívneho Elemena za jedného z lavičky. Ten druhý pôjde bojovať namiesto neho.",
+  ciel:"Cieľ hry: poraz všetkých súperových Elemenov. Kto ostane bez Elemenov, prehráva.",
+  evolucia:"Evolúcia: Elemen sa vyvinie na silnejšieho. Ťukni na evolučnú kartu v ruke a tvoj Elemen sa zmení na väčšieho, s viac životmi a silnejšími útokmi. Zranenie a energiu si nechá. Najprv základné, potom prvé štádium, potom druhé.",
+  trainer:"Trainer karty ti pomáhajú. Ťukni na kartu v ruke a použi ju: vyliečiš Elemena, nabereš nové karty, vymeníš Elemena alebo pridáš energiu.",
+  ruka:"Toto sú tvoje karty v ruke. Ťukni na kartu a použiješ ju. Každé kolo si naberieš jednu novú kartu.",
+};
+
+/* ================= STAV ================= */
+let hra = null;
+let volbaUroven = 1;
+let volbaRezim = "2hraci";
+let spracuva = false; // zámok počas čítania/animácie, aby sa nedalo kliknúť dvakrát
+
+/* ================= HLAS ================= */
+let hlas = null;          // automaticky vybraný SK/CS hlas (záloha)
+let vybranyHlas = null;   // hlas, ktorý si zvolil používateľ
+let rychlostReci = 0.95;  // 0.8 pomaly, 0.95 normálne, 1.15 rýchlo
+function vsetkyHlasy(){ return window.speechSynthesis ? speechSynthesis.getVoices() : []; }
+function nacitajHlasy(){
+  const vs = vsetkyHlasy();
+  hlas = vs.find(v=>v.lang&&v.lang.toLowerCase().startsWith("sk"))
+      || vs.find(v=>v.lang&&v.lang.toLowerCase().startsWith("cs"))
+      || null;
+  if(!vybranyHlas) vybranyHlas = hlas;   // predvolený = automatický
+  naplnHlasSelect();
+}
+if (window.speechSynthesis){ speechSynthesis.onvoiceschanged = nacitajHlasy; nacitajHlasy(); }
+// odhad dĺžky čítania (poistka, ak sa neozve koniec reči)
+function odhadMs(t){ return Math.max(1400, (t?String(t).length:0)*80); }
+// povedz(text, hotovo) – 'hotovo' sa zavolá AŽ keď sa text dočíta (alebo poistkou)
+function povedz(t, hotovo){
+  let done = false;
+  const spusti = ()=>{ if(done) return; done=true; if(hotovo) hotovo(); };
+  try{
+    if(!window.speechSynthesis || !t){ setTimeout(spusti, t?odhadMs(t):50); return; }
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(t);
+    const v = vybranyHlas || hlas;
+    if(v){ u.voice = v; u.lang = v.lang; } else { u.lang = "sk-SK"; }
+    u.rate = rychlostReci; u.pitch = 1.05;
+    u.onend = spusti; u.onerror = spusti;
+    speechSynthesis.speak(u);
+    setTimeout(spusti, odhadMs(t)+2000); // poistka, ak onend nezafunguje
+  }catch(e){ setTimeout(spusti, odhadMs(t)); }
+}
+
+/* ---- výber hlasu a rýchlosti ---- */
+function naplnHlasSelect(){
+  const sel = document.getElementById('hlasSelect');
+  if(!sel) return;
+  const vs = vsetkyHlasy().slice().sort((a,b)=>{
+    const rank = v => (v.lang||"").toLowerCase().startsWith("sk") ? 0
+                    : (v.lang||"").toLowerCase().startsWith("cs") ? 1 : 2;
+    return rank(a)-rank(b) || (a.name>b.name?1:-1);
+  });
+  const zvoleny = (vybranyHlas && vybranyHlas.voiceURI) || "";
+  if(!vs.length){ sel.innerHTML = `<option value="">(v tablete zatiaľ nie je žiadny hlas)</option>`; return; }
+  sel.innerHTML = vs.map(v=>{
+    const sk = (v.lang||"").toLowerCase().startsWith("sk") ? "🇸🇰 " : (v.lang||"").toLowerCase().startsWith("cs") ? "🇨🇿 " : "";
+    return `<option value="${v.voiceURI}" ${v.voiceURI===zvoleny?"selected":""}>${sk}${v.name} (${v.lang})</option>`;
+  }).join("");
+}
+function nastavHlasZoSelectu(){
+  const sel = document.getElementById('hlasSelect');
+  const v = vsetkyHlasy().find(x=>x.voiceURI===sel.value);
+  if(v){ vybranyHlas = v; skusHlas(); }
+}
+function nastavRychlost(r){
+  rychlostReci = r;
+  document.querySelectorAll('[data-rych]').forEach(e=>e.classList.toggle('aktiv', parseFloat(e.dataset.rych)===r));
+  skusHlas();
+}
+function skusHlas(){ povedz("Ahoj! Takto čítam. Poďme sa spolu hrať!"); }
+function otvorHlas(){ naplnHlasSelect();
+  document.querySelectorAll('[data-rych]').forEach(e=>e.classList.toggle('aktiv', parseFloat(e.dataset.rych)===rychlostReci));
+  document.getElementById('hlas').classList.remove('skryte'); }
+function zavriHlas(){ if(window.speechSynthesis) speechSynthesis.cancel(); document.getElementById('hlas').classList.add('skryte'); }
+
+/* ================= MENU ================= */
+function vyberUroven(u){ volbaUroven=u; document.querySelectorAll('[data-uroven]').forEach(e=>e.classList.toggle('aktiv', +e.dataset.uroven===u)); }
+function vyberRezim(r){ volbaRezim=r; document.querySelectorAll('[data-rezim]').forEach(e=>e.classList.toggle('aktiv', e.dataset.rezim===r)); }
+
+function spustiHru(){
+  povedz(""); // odomkne hlas prvým klikom
+  const menoP2 = volbaRezim==="pocitac" ? "Počítač" : "Hráč 2";
+  hra = {
+    uroven: volbaUroven,
+    rezim: volbaRezim,
+    naTahu: 0,
+    fazaEnergiaPouzita:false,
+    fazaVymenaPouzita:false,
+    hraci: [
+      spravHraca("Hráč 1", "sopecny"),
+      spravHraca(menoP2,   "oceansky"),
+    ],
+  };
+  document.getElementById('menu').classList.add('skryte');
+  document.getElementById('vitaz').classList.add('skryte');
+  document.getElementById('stol').classList.remove('skryte');
+  zacniTah();
+}
+function spravTim(deckId){
+  return DECKS[deckId].karty.map(id=>({ def:KARTY[id], hp:KARTY[id].hp, energia:0, zive:true }));
+}
+function zamiesaj(pole){ // Fisher–Yates
+  const p = pole.slice();
+  for(let i=p.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [p[i],p[j]]=[p[j],p[i]]; }
+  return p;
+}
+function spravHraca(meno, deckId){
+  const h = { meno, tim: spravTim(deckId), aktivnyIndex:0, ruka:[], balicek:[] };
+  if(volbaUroven>=3){
+    const pool = zamiesaj(DECKS[deckId].l3 || []);
+    h.ruka = pool.slice(0,3);      // 3 karty na začiatok
+    h.balicek = pool.slice(3);     // zvyšok do naberania
+  }
+  return h;
+}
+function domov(){
+  if(window.speechSynthesis) speechSynthesis.cancel();
+  document.querySelectorAll('.overlay').forEach(o=>o.classList.add('skryte'));
+  document.getElementById('stol').classList.add('skryte');
+  document.getElementById('menu').classList.remove('skryte');
+}
+
+/* ================= POMOCNÉ ================= */
+function jeAI(i){ return hra.rezim==="pocitac" && i===1; }
+function vyhoda(utocnik, obranca){ return SILNY[utocnik] && SILNY[utocnik].includes(obranca) ? 2 : 1; }
+function zive(hrac){ return hrac.tim.filter(c=>c.zive); }
+function aktiv(hrac){ return hrac.tim[hrac.aktivnyIndex]; }
+
+/* ================= VYKRESLENIE ================= */
+function kartaHTML(inst, velka){
+  const cls = "karta " + (velka?"velka ":"mala ") + "t-"+inst.def.typ + (inst.zive?"":" mrtva");
+  const pct = Math.max(0, Math.round(inst.hp / inst.def.hp * 100));
+  let en = "";
+  if(hra.uroven>=2 && velka){ en = `<div class="energia">${"⚡".repeat(inst.energia)||"&nbsp;"}</div>`; }
+  return `<div class="${cls}">
+    <div class="typBadge">${TYP_EMOJI[inst.def.typ]}</div>
+    <div class="emoji">${inst.def.emoji}</div>
+    <div class="meno">${inst.def.meno}</div>
+    <div class="hpText">❤️ ${Math.max(0,inst.hp)}/${inst.def.hp}</div>
+    <div class="hpBar"><div style="width:${pct}%;background:${pct>50?'#38b000':pct>25?'#ffb300':'#e63946'}"></div></div>
+    ${en}
+  </div>`;
+}
+
+function render(){
+  const sup = hra.hraci[1], moj = hra.hraci[0];
+  // POZOR: "hore" ukazujeme súpera aktuálneho hráča. Pre jednoduchosť: hore = hráč 2, dole = hráč 1.
+  const horny = hra.hraci[1], dolny = hra.hraci[0];
+
+  // horná lišta
+  const h = hra.hraci[hra.naTahu];
+  document.getElementById('kdoNaTahu').textContent = "▶️ Na ťahu: " + h.meno + (jeAI(hra.naTahu)?" 🤖":"");
+
+  // súperova oblasť (hore)
+  document.getElementById('superArea').innerHTML =
+    `<div class="stitok">${horny.meno}</div>
+     <div class="aktivnyObal">${kartaHTML(aktiv(horny), true)}</div>
+     <div class="lavicka">${horny.tim.map((c,i)=> i===horny.aktivnyIndex?"":kartaHTML(c,false)).join("")}</div>`;
+
+  // moja oblasť (dole)
+  document.getElementById('mojaArea').innerHTML =
+    `<div class="stitok">${dolny.meno}</div>
+     <div class="aktivnyObal">${kartaHTML(aktiv(dolny), true)}</div>
+     <div class="lavicka">${dolny.tim.map((c,i)=> i===dolny.aktivnyIndex?"":kartaHTML(c,false)).join("")}</div>`;
+
+  // ruka (Úroveň 3) – len pre aktuálneho ľudského hráča, keď nie je zámok
+  const ruka = document.getElementById('ruka');
+  if(hra.uroven>=3 && !jeAI(hra.naTahu) && !spracuva){
+    ruka.classList.remove('skryte');
+    ruka.innerHTML = rukaHTML(hra.hraci[hra.naTahu]);
+  } else {
+    ruka.classList.add('skryte');
+    ruka.innerHTML = "";
+  }
+
+  document.getElementById('akcie').innerHTML = akcieHTML();
+}
+
+function rukaHTML(h){
+  let karty = "";
+  if(!h.ruka.length){
+    karty = `<div style="opacity:.8;padding:8px;font-size:14px">Prázdna ruka</div>`;
+  } else {
+    karty = h.ruka.map((id,i)=>{
+      const d = defKarty(id);
+      const trainer = d.druh==="trainer";
+      const cls = "rukaKarta" + (trainer?" trainer":" t-"+d.typ);
+      const stadium = d.stadium==="stage1" ? "1. štádium" : d.stadium==="stage2" ? "2. štádium" : "";
+      const spodok = trainer
+        ? `<div class="rPop">${d.popis}</div>`
+        : `<div class="rStadium">✨ ${stadium}</div><div class="rPop">❤️${d.hp}</div>`;
+      const nap = trainer ? d.popis
+        : `Evolučná karta ${d.meno}. Ťukni ňou a vyvinie sa tvoj Elemen ${defKarty(d.evoluujeZ).meno} na ${d.meno}. Má ${d.hp} života.`;
+      return `<div class="${cls}" onclick="hrajKartu(${i})">
+        <div class="rQ" onclick='event.stopPropagation();napoveda(${JSON.stringify(nap)})'>❓</div>
+        <div class="rEmoji">${d.emoji}</div>
+        <div class="rMeno">${d.meno}</div>
+        ${spodok}
+      </div>`;
+    }).join("");
+  }
+  return `<div class="rukaHlavicka">🃏 Tvoje karty (ťukni na kartu)
+    <button class="qBtn" style="width:32px;height:32px;font-size:16px" onclick='napoveda(HELP.ruka)'>❓</button></div>
+    <div class="rukaKarty">${karty}</div>`;
+}
+
+function riadok(tlacidlo, napovedaText){
+  const q = napovedaText ? `<button class="qBtn" onclick='napoveda(${JSON.stringify(napovedaText)})'>❓</button>` : "";
+  return `<div class="akciaRiadok">${tlacidlo}${q}</div>`;
+}
+
+function akcieHTML(){
+  if(spracuva) return `<div class="cakaj">⏳ Chvíľku…</div>`;
+  if(jeAI(hra.naTahu)) return `<div class="cakaj">Súper premýšľa… 🤔</div>`;
+  const h = hra.hraci[hra.naTahu];
+  const a = aktiv(h);
+  let out = "";
+
+  // energia (úroveň 2)
+  if(hra.uroven>=2){
+    const dis = hra.fazaEnergiaPouzita;
+    out += riadok(
+      `<button class="akcia modra ${dis?'siva':''}" ${dis?'disabled':''} onclick="pripojEnergiu()">➕⚡ Pripoj energiu</button>`,
+      HELP.energia);
+  }
+
+  // útoky
+  a.def.utoky.forEach((u,idx)=>{
+    if(hra.uroven===1 && idx>0) return; // úroveň 1: len prvý útok
+    let dostupny = true, prefix = "⚔️";
+    if(hra.uroven>=2){
+      dostupny = a.energia >= u.cena;
+      prefix = "⚔️ " + "⚡".repeat(u.cena);
+    }
+    const napovedaU = `Útok ${u.meno}. Spôsobí ${u.dmg} zranenia.` +
+      (hra.uroven>=2?` Potrebuje ${u.cena} energiu.`:``) +
+      ` Ak je súper slabší typ, zranenie je dvojnásobné.`;
+    out += riadok(
+      `<button class="akcia ${dostupny?'':'siva'}" ${dostupny?'':'disabled'} onclick="zautoc(${idx})">${prefix} ${u.meno} · 💥${u.dmg}</button>`,
+      napovedaU);
+  });
+
+  // výmena (ak je koho)
+  if(zive(h).length>1){
+    const zakaz = hra.uroven>=2 && hra.fazaVymenaPouzita;
+    out += riadok(
+      `<button class="akcia modra ${zakaz?'siva':''}" ${zakaz?'disabled':''} onclick="zacniVymenu()">🔄 Vymeniť</button>`,
+      HELP.vymena);
+  }
+
+  // koniec ťahu (úroveň 2)
+  if(hra.uroven>=2){
+    out += riadok(`<button class="akcia" onclick="koniecTahu()">✅ Koniec ťahu</button>`, null);
+  }
+  return out;
+}
+
+/* ================= AKCIE ================= */
+function nastavSpravu(t){ document.getElementById('spravaText').textContent = t; }
+let poslednaSprava = "";
+function oznam(t, hovor=true, hotovo){
+  poslednaSprava=t; nastavSpravu(t);
+  if(hovor){ povedz(t, hotovo); }
+  else if(hotovo){ setTimeout(hotovo, 250); }
+}
+function zopakuj(){ if(poslednaSprava) povedz(poslednaSprava); }
+
+function pripojEnergiu(){
+  if(spracuva || hra.fazaEnergiaPouzita) return;
+  const a = aktiv(hra.hraci[hra.naTahu]);
+  a.energia++; hra.fazaEnergiaPouzita = true;
+  oznam("Pripojil si energiu. Teraz máš " + a.energia + " energie.", false);
+  render();
+}
+
+function zautoc(idx){
+  if(spracuva) return;
+  const utocnikHrac = hra.hraci[hra.naTahu];
+  const obrancaHrac = hra.hraci[1-hra.naTahu];
+  const a = aktiv(utocnikHrac);
+  const b = aktiv(obrancaHrac);
+  const u = a.def.utoky[idx];
+  if(hra.uroven>=2 && a.energia < u.cena) return;
+
+  const nasobok = vyhoda(a.def.typ, b.def.typ);
+  const dmg = u.dmg * nasobok;
+  b.hp -= dmg;
+
+  let sprava = a.def.meno + " použil " + u.meno + " a dal " + dmg + " zranenia.";
+  if(nasobok>1) sprava += " Výhoda typu! Dvojnásobné zranenie!";
+
+  spracuva = true;            // zamkni tlačidlá počas čítania
+  poslednaSprava = sprava; nastavSpravu(sprava);
+  render();
+
+  // POČKAJ, kým sa opis útoku celý dočíta, až potom pokračuj
+  povedz(sprava, ()=>{
+    if(b.hp<=0){
+      b.hp=0; b.zive=false; render();
+      oznam(b.def.meno + " už nevládze!", true, ()=>{
+        if(zive(obrancaHrac).length===0){ vyhra(utocnikHrac); return; }
+        // obranca si musí vybrať nového aktívneho Elemena
+        vyberNoveAktivne(1-hra.naTahu, ()=>koniecTahu());
+      });
+    } else {
+      koniecTahu();
+    }
+  });
+}
+
+function zacniVymenu(){
+  if(spracuva) return;
+  if(hra.uroven>=2 && hra.fazaVymenaPouzita) return;
+  vyberNoveAktivne(hra.naTahu, ()=>{
+    if(hra.uroven>=2){ hra.fazaVymenaPouzita=true; render(); }
+    else { koniecTahu(); }  // úroveň 1: výmena ukončí ťah
+  }, true);
+}
+
+// Overlay na výber Elemena z lavičky
+function vyberNoveAktivne(hracIndex, callback, dobrovolne=false){
+  const h = hra.hraci[hracIndex];
+  document.getElementById('vyberText').textContent = dobrovolne
+    ? h.meno + ", vyber Elemena, ktorý pôjde bojovať:"
+    : h.meno + ", tvoj Elemen omdlel. Vyber ďalšieho:";
+  povedz(document.getElementById('vyberText').textContent);
+  const zoznam = document.getElementById('vyberZoznam');
+  zoznam.innerHTML = "";
+  h.tim.forEach((c,i)=>{
+    if(!c.zive || i===h.aktivnyIndex) return;
+    const div = document.createElement('div');
+    div.innerHTML = kartaHTML(c,false);
+    const karta = div.firstElementChild;
+    karta.classList.add('vyberatelna');
+    karta.onclick = ()=>{
+      h.aktivnyIndex = i;
+      document.getElementById('vyber').classList.add('skryte');
+      render();
+      callback();
+    };
+    zoznam.appendChild(karta);
+  });
+  document.getElementById('vyber').classList.remove('skryte');
+}
+
+/* ================= TOK HRY ================= */
+function zacniTah(){
+  spracuva = false;
+  hra.fazaEnergiaPouzita = false;
+  hra.fazaVymenaPouzita = false;
+  const h = hra.hraci[hra.naTahu];
+  // Úroveň 3: naber 1 kartu
+  if(hra.uroven>=3 && h.balicek.length){ h.ruka.push(h.balicek.shift()); }
+  render();
+  oznam("Na ťahu je " + h.meno + ".", true);
+  if(jeAI(hra.naTahu)) setTimeout(aiTah, 800);
+}
+
+/* ===== Úroveň 3: hranie kariet z ruky ===== */
+function naberKarty(h, kolko){
+  for(let i=0;i<kolko && h.balicek.length;i++){ h.ruka.push(h.balicek.shift()); }
+}
+function najdiCielEvolucie(h, evoId){
+  // vráti index Elemena v hre, ktorý je predchádzajúcim štádiom (najprv aktívny)
+  const cielDef = KARTY[evoId];
+  if(h.tim[h.aktivnyIndex].zive && h.tim[h.aktivnyIndex].def===cielDef) return h.aktivnyIndex;
+  return h.tim.findIndex(c=>c.zive && c.def===cielDef);
+}
+function hrajKartu(index){
+  if(spracuva) return;
+  const h = hra.hraci[hra.naTahu];
+  const id = h.ruka[index];
+  if(!id) return;
+  const d = defKarty(id);
+
+  if(d.druh==="trainer"){
+    pouziTrainer(index, id, d, h);
+    return;
+  }
+  // evolučná karta
+  const cielIdx = najdiCielEvolucie(h, d.evoluujeZ);
+  if(cielIdx<0){
+    napoveda("Túto evolúciu ešte nemôžeš zahrať. Najprv potrebuješ v hre Elemena " + defKarty(d.evoluujeZ).meno + ".");
+    return;
+  }
+  const c = h.tim[cielIdx];
+  const staryMeno = c.def.meno;
+  const dmgTaken = c.def.hp - c.hp;      // zachovaj zranenie
+  c.def = KARTY[id];
+  c.hp = Math.max(1, KARTY[id].hp - dmgTaken);
+  h.ruka.splice(index,1);
+  spracuva = true; render();
+  oznam(staryMeno + " sa vyvinul na " + c.def.meno + "!", true, ()=>{ spracuva=false; render(); });
+}
+function pouziTrainer(index, id, d, h){
+  const a = aktiv(h);
+  if(d.efekt==="liec30"){
+    const pred = a.hp; a.hp = Math.min(a.def.hp, a.hp+30);
+    h.ruka.splice(index,1);
+    spracuva=true; render();
+    oznam("Lekárnička: " + a.def.meno + " sa vyliečil o " + (a.hp-pred) + " života.", true, ()=>{ spracuva=false; render(); });
+  } else if(d.efekt==="naber2"){
+    h.ruka.splice(index,1);
+    naberKarty(h,2);
+    spracuva=true; render();
+    oznam("Profesorka: nabral si nové karty.", true, ()=>{ spracuva=false; render(); });
+  } else if(d.efekt==="energia1"){
+    a.energia++;
+    h.ruka.splice(index,1);
+    spracuva=true; render();
+    oznam("Super energia: " + a.def.meno + " má teraz " + a.energia + " energie.", true, ()=>{ spracuva=false; render(); });
+  } else if(d.efekt==="vymen"){
+    if(zive(h).length<2){ napoveda("Nemáš na lavičke iného Elemena na výmenu."); return; }
+    h.ruka.splice(index,1);
+    vyberNoveAktivne(hra.naTahu, ()=>{ render(); }, true);
+  }
+}
+
+function koniecTahu(){
+  spracuva = false;
+  hra.naTahu = 1 - hra.naTahu;
+  if(hra.rezim==="2hraci"){
+    // vždy dvaja ľudia -> obrazovka na podanie tabletu
+    ukazPass(hra.hraci[hra.naTahu].meno);
+  } else {
+    zacniTah();
+  }
+}
+
+function ukazPass(meno){
+  document.getElementById('passText').textContent = "Podaj tablet: " + meno;
+  povedz("Podaj tablet ďalšiemu hráčovi. " + meno);
+  document.getElementById('pass').classList.remove('skryte');
+}
+function passHotovo(){
+  document.getElementById('pass').classList.add('skryte');
+  zacniTah();
+}
+
+function vyhra(hrac){
+  document.getElementById('vitazText').textContent = "🎉 Vyhral " + hrac.meno + "! 🎉";
+  povedz("Vyhral " + hrac.meno + "! Gratulujem!");
+  document.getElementById('vitaz').classList.remove('skryte');
+}
+
+/* ================= AI ================= */
+function aiTah(){
+  const me = hra.hraci[1], opp = hra.hraci[0];
+  const a = aktiv(me), b = aktiv(opp);
+
+  // úroveň 2: pripoj energiu
+  if(hra.uroven>=2 && !hra.fazaEnergiaPouzita){
+    a.energia++; hra.fazaEnergiaPouzita = true;
+    oznam("Súper pripojil energiu.", false);
+    render();
+  }
+
+  // úroveň 3: skús vyvinúť aktívne, prípadne sa vyliečiť
+  if(hra.uroven>=3){
+    let ei = me.ruka.findIndex(id=>{ const d=defKarty(id); return d.druh!=="trainer" && aktiv(me).def===KARTY[d.evoluujeZ]; });
+    if(ei>=0){
+      const c=aktiv(me); const stary=c.def.meno; const dmgT=c.def.hp-c.hp;
+      c.def=KARTY[me.ruka[ei]]; c.hp=Math.max(1,c.def.hp-dmgT);
+      me.ruka.splice(ei,1);
+      oznam("Súper vyvinul "+stary+" na "+c.def.meno+".", false);
+      render();
+    }
+    const c=aktiv(me);
+    if(c.hp < c.def.hp*0.4){
+      const li=me.ruka.findIndex(id=>{ const d=defKarty(id); return d && d.efekt==="liec30"; });
+      if(li>=0){ c.hp=Math.min(c.def.hp,c.hp+30); me.ruka.splice(li,1); oznam("Súper použil Lekárničku.",false); render(); }
+    }
+  }
+
+  setTimeout(()=>{
+    // vyber najlepší dostupný útok
+    let best=-1, bi=-1;
+    a.def.utoky.forEach((u,idx)=>{
+      if(hra.uroven===1 && idx>0) return;
+      if(hra.uroven>=2 && a.energia < u.cena) return;
+      const eff = u.dmg * vyhoda(a.def.typ, b.def.typ);
+      if(eff>best){ best=eff; bi=idx; }
+    });
+    if(bi>=0){ spracuva=false; zautoc(bi); return; }
+
+    // nemá čím útočiť -> skús vymeniť na Elemena s výhodou, čo hneď zaútočí
+    let cie= -1;
+    me.tim.forEach((c,i)=>{
+      if(i===me.aktivnyIndex || !c.zive) return;
+      if(cie=== -1) cie=i;
+      if(vyhoda(c.def.typ, b.def.typ)>1) cie=i;
+    });
+    if(cie>=0){
+      me.aktivnyIndex = cie;
+      oznam("Súper vymenil Elemena.", true);
+      render();
+      setTimeout(()=>{ hra.fazaVymenaPouzita=true; aiTah(); }, 700);
+    } else {
+      koniecTahu();
+    }
+  }, 600);
+}
+
+/* ================= NÁPOVEDA / MODAL ================= */
+let modalText = "";
+function napoveda(text){
+  modalText = text;
+  document.getElementById('modalText').textContent = text;
+  document.getElementById('modal').classList.remove('skryte');
+  povedz(text);
+}
+function zopakujModal(){ if(modalText) povedz(modalText); }
+function zavriModal(){ document.getElementById('modal').classList.add('skryte'); if(window.speechSynthesis) speechSynthesis.cancel(); }
+
+function akoSaHra(){
+  let t;
+  if(hra && hra.uroven>=3){
+    t = "Ako sa hrá. Každé kolo si naberieš jednu kartu do ruky. Ťuknutím na kartu v ruke vyvinieš svojho Elemena na silnejšieho, alebo použiješ Trainer kartu. Potom pripoj energiu a zaútoč, alebo vymeň Elemena z lavičky. Keď súperovi klesne život na nulu, jeho Elemen omdlie. Vyhráva ten, kto porazí všetkých súperových Elemenov. Nezabudni: oheň porazí trávu, tráva vodu, voda oheň a elektro porazí vodu.";
+  } else if(hra && hra.uroven>=2){
+    t = "Ako sa hrá. Každé kolo najprv pripoj jednu energiu. Potom môžeš zaútočiť, alebo vymeniť Elemena za jedného z lavičky. Útoky potrebujú energiu. Keď súperovi klesne život na nulu, jeho Elemen omdlie. Vyhráva ten, kto porazí všetkých súperových Elemenov. Nezabudni: oheň porazí trávu, tráva vodu, voda oheň a elektro porazí vodu.";
+  } else {
+    t = "Ako sa hrá. Na ťahu si zaútočíš na súperovho Elemena, alebo ho vymeníš za iného z lavičky. Keď súperovi klesne život na nulu, jeho Elemen omdlie. Vyhráva ten, kto porazí všetkých súperových Elemenov. Nezabudni: oheň porazí trávu, tráva vodu, voda oheň a elektro porazí vodu.";
+  }
+  napoveda(t);
+}
+</script>
+</body>
+</html>
