@@ -15,3 +15,4 @@ Aktualna hra je vzdy subor **elemen.html**. Starsie verzie su v priecinku versio
 - **v11** (2026-08-01): responzivne pre mobil — obsah sa da skrolovat, kompaktne karty a tlacidla na uzkych displejoch, posuvatelne okna.
 - **v12** (2026-08-02): tutorial „Nauc ma hrat" (hlas vedie prvou hrou), profily hracov podla mena + Rekordy, pamatanie nastaveni a rozohranej hry (Pokracovat v hre), Uroven 4 – Turnaj (vyherne karty, prvy tah bez utoku, deck-out; zatial bez stavov a slabosti/odolnosti).
 - **v13** (2026-08-02): AI kreslene obrazky vsetkych Elemenov na kartach (emoji ostava ako zaloha) + dva nove timy: Lesny 🌳 a Ladovy ❄️ — 18 novych Elemenov (10 zakladnych + 8 evolucii), spolu 36.
+- **v13.1** (2026-08-02): zjednotenie dizajnu obrazkov — 17 ks pregenerovanych podla predlohy Plamienka (prec ramiky, text a fotografie v obrazkoch, jednotne ziarive pozadie). Kod hry bez zmeny.
