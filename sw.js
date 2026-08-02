@@ -1,7 +1,7 @@
 /* ELEMEN – service worker: hra funguje aj offline.
    Pri vydaní novej verzie hry zvýš číslo CACHE (elemen-v12, v13, …),
    aby si zariadenia stiahli čerstvé súbory. */
-const CACHE = 'elemen-v11';
+const CACHE = 'elemen-v12';
 const SUBORY = [
   '.',
   'index.html',

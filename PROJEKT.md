@@ -13,13 +13,22 @@ nepoužívať skutočných Pokémonov — mená, obrázky, názvy útokov sú ch
 Stvorenia sa volajú **Elemeni** (vlastné: Plamienko 🦊, Kvapko 🐢, Ohnivec 🐺,
 Ohňodrak 🐉, …), vizuál = emoji + farby.
 
-## Kľúčové vlastnosti (stav k v11)
+## Kľúčové vlastnosti (stav k v12)
 - **Úrovne (učiaci rebríček):** 1 = súboj + typy (výhoda ×2: oheň>tráva>voda>oheň,
   elektro>voda), 2 = + energia (1/kolo, útoky stoja energiu) a lavička/výmena,
   3 = + evolúcie (základ → 1. → 2. štádium, zachováva zranenie aj energiu),
   ruka + balíček 15 kariet (5 do ruky, 1 ťah/kolo) a Trainer karty
   (Lekárnička +30 HP, Profesorka +2 karty, Odvolanie = výmena zdarma,
-  Super energia +1 ⚡). **Úroveň 4 je PLÁN** (pozri nižšie).
+  Super energia +1 ⚡), 4 = Turnaj „light": 3 výherné karty (KO súperovho
+  Elemena = vezmi 1; kto vezme všetky, vyhráva), v 1. ťahu hry sa neútočí,
+  deck-out = prehra. Stavy a slabosť/odolnosť ZATIAĽ NIE (backlog, úroveň 4+).
+- **Tutoriál:** tlačidlo „🎓 Nauč ma hrať" — úroveň 1 vs počítač, hlas vedie
+  dieťa krokmi (modal „Rozumiem" → zvýraznené tlačidlo `.tutorialCiel`),
+  po pár ťahoch „hraj sám". Riadi `hra.tutorial.krok` (0–6).
+- **Profily a pamäť (localStorage):** `elemen_nastavenia` (hlas, rýchlosť,
+  posledné voľby menu), `elemen_profily` {meno:{vyhry,hry}} + okno 🏅 Rekordy,
+  `elemen_rozohrana` — auto-uloženie na začiatku ťahu, tlačidlo „Pokračovať
+  v hre" v menu (serializácia cez id kariet, `idKarty()`/`obnovHru()`).
 - **Režimy:** 2 hráči na jednom zariadení alebo proti počítaču (AI si sama
   vyberá tím, štartového Elemena aj náhradu po KO).
 - **Tablet:** voľba „Podávať si" (súkromná ruka + pass obrazovka) vs
@@ -58,13 +67,19 @@ Ohňodrak 🐉, …), vizuál = emoji + farby.
   na každej úrovni, oba režimy; overiť KO → výber náhradníka; žiadne chyby
   v konzole. Testy simulujú speechSynthesis stubom (onend po ~30 ms).
 
-## Plán (ďalšie kroky, v poradí)
-1. **Úroveň 4 — plné pravidlá:** výherné (prize) karty, stavy (spánok, otrava,
-   paralýza, popálenie, zmätok), slabosť/odolnosť (+/−20 namiesto ×2),
-   deck-out prehra, prísnejšie pravidlá kola (bez útoku v 1. kole a pod.).
-2. Viac Elemenov a balíčkov; prípadne AI kreslené obrázky namiesto emoji.
-3. Neskôr (veľký krok): účty a história — vyžaduje backend (napr. Supabase);
-   vtedy repo prepnúť na private + hosting Netlify/Cloudflare Pages.
+## Backlog (nápady odsúhlasené používateľom „na neskôr", v poradí)
+1. **Obrázky Elemenov namiesto emoji** — jednotný detský kreslený štýl;
+   ukážky štýlu (Plamienko, Kvapko, Ohňodrak) už boli vygenerované a čaká sa
+   na schválenie štýlu používateľom; potom celá sada 18 ks + integrácia.
+2. **Animácie a zvuky** — trasenie karty pri útoku, lietajúce čísla zranenia,
+   konfety pri výhre, jednoduché zvuky cez WebAudio (bez externých súborov).
+3. **Album kariet** — výhrami sa odomykajú Elemeni do zbierky (localStorage).
+4. **Úroveň 4+ (plné pravidlá):** stavy (spánok, otrava, paralýza, popálenie,
+   zmätok), slabosť/odolnosť (+/−20 namiesto ×2).
+5. Viac Elemenov a balíčkov; prípadne vlastný výber 5 kariet do tímu.
+6. Obtiažnosť počítača (ľahký robí chyby / múdry).
+7. Multiplayer cez internet (veľký krok — vyžaduje server/backend);
+   vtedy zvážiť účty a históriu (napr. Supabase) + private repo.
 
 ## Štýl komunikácie s používateľom
 Marian nie je programátor — hovoriť ľudsky, po slovensky, bez žargónu.
