@@ -11,9 +11,14 @@ Beží ako JEDEN samostatný HTML súbor (`elemen.html` / na GitHube `index.html
 Právny rámec: mechaniky Pokémon TCG sú OK (pravidlá nie sú chránené), ale NIKDY
 nepoužívať skutočných Pokémonov — mená, obrázky, názvy útokov sú chránené.
 Stvorenia sa volajú **Elemeni** (vlastné: Plamienko 🦊, Kvapko 🐢, Ohnivec 🐺,
-Ohňodrak 🐉, …), vizuál = emoji + farby.
+Ohňodrak 🐉, …). Vizuál od v13 = AI kreslené obrázky v `obrazky/<id>.webp`
+(jednotný detský štýl, generované cez Higgsfield nano_banana; nový Elemen =
+vygenerovať obrázok a doplniť riadok do `.github/workflows/obrazky.yml`,
+ktorý obrázky sťahuje a commitne — obrázkové CDN nie je dostupné z Claude
+prostredia). Emoji každej karty OSTÁVA ako záloha, kým sa obrázok nenačíta
+(`artHTML()` v index.html).
 
-## Kľúčové vlastnosti (stav k v12)
+## Kľúčové vlastnosti (stav k v13)
 - **Úrovne (učiaci rebríček):** 1 = súboj + typy (výhoda ×2: oheň>tráva>voda>oheň,
   elektro>voda), 2 = + energia (1/kolo, útoky stoja energiu) a lavička/výmena,
   3 = + evolúcie (základ → 1. → 2. štádium, zachováva zranenie aj energiu),
@@ -29,6 +34,8 @@ Ohňodrak 🐉, …), vizuál = emoji + farby.
   posledné voľby menu), `elemen_profily` {meno:{vyhry,hry}} + okno 🏅 Rekordy,
   `elemen_rozohrana` — auto-uloženie na začiatku ťahu, tlačidlo „Pokračovať
   v hre" v menu (serializácia cez id kariet, `idKarty()`/`obnovHru()`).
+- **Tímy (4):** Sopečný 🌋, Oceánsky 🌊, Lesný 🌳, Ľadový ❄️ — každý 5
+  základných Elemenov + 2 evolučné línie v `l3`. Spolu 36 Elemenov.
 - **Režimy:** 2 hráči na jednom zariadení alebo proti počítaču (AI si sama
   vyberá tím, štartového Elemena aj náhradu po KO).
 - **Tablet:** voľba „Podávať si" (súkromná ruka + pass obrazovka) vs
@@ -68,18 +75,16 @@ Ohňodrak 🐉, …), vizuál = emoji + farby.
   v konzole. Testy simulujú speechSynthesis stubom (onend po ~30 ms).
 
 ## Backlog (nápady odsúhlasené používateľom „na neskôr", v poradí)
-1. **Obrázky Elemenov namiesto emoji** — jednotný detský kreslený štýl;
-   ukážky štýlu (Plamienko, Kvapko, Ohňodrak) už boli vygenerované a čaká sa
-   na schválenie štýlu používateľom; potom celá sada 18 ks + integrácia.
-2. **Animácie a zvuky** — trasenie karty pri útoku, lietajúce čísla zranenia,
+1. **Animácie a zvuky** — trasenie karty pri útoku, lietajúce čísla zranenia,
    konfety pri výhre, jednoduché zvuky cez WebAudio (bez externých súborov).
-3. **Album kariet** — výhrami sa odomykajú Elemeni do zbierky (localStorage).
-4. **Úroveň 4+ (plné pravidlá):** stavy (spánok, otrava, paralýza, popálenie,
+2. **Album kariet** — výhrami sa odomykajú Elemeni do zbierky (localStorage).
+3. **Úroveň 4+ (plné pravidlá):** stavy (spánok, otrava, paralýza, popálenie,
    zmätok), slabosť/odolnosť (+/−20 namiesto ×2).
-5. Viac Elemenov a balíčkov; prípadne vlastný výber 5 kariet do tímu.
-6. Obtiažnosť počítača (ľahký robí chyby / múdry).
-7. Multiplayer cez internet (veľký krok — vyžaduje server/backend);
+4. Vlastný výber 5 kariet do tímu („mini deck builder").
+5. Obtiažnosť počítača (ľahký robí chyby / múdry).
+6. Multiplayer cez internet (veľký krok — vyžaduje server/backend);
    vtedy zvážiť účty a históriu (napr. Supabase) + private repo.
+(Hotové z backlogu: obrázky Elemenov — v13; dva nové tímy — v13.)
 
 ## Štýl komunikácie s používateľom
 Marian nie je programátor — hovoriť ľudsky, po slovensky, bez žargónu.
