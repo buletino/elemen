@@ -91,7 +91,33 @@ workflowom na vetve).
 5. Obtiažnosť počítača (ľahký robí chyby / múdry).
 6. Multiplayer cez internet (veľký krok — vyžaduje server/backend);
    vtedy zvážiť účty a históriu (napr. Supabase) + private repo.
+7. **Viacjazyčnosť (SK/EN, neskôr ďalšie):** slovník textov (~150–200 viet
+   vytiahnuť z kódu), prepínač jazyka v menu (pamätať v nastaveniach),
+   hlas speechSynthesis podľa jazyka; testy prepnúť na data-atribúty namiesto
+   klikania na texty. Odhad = jedno väčšie vydanie. Anglické mená sú UŽ
+   SCHVÁLENÉ používateľom — pozri sekciu nižšie.
 (Hotové z backlogu: obrázky Elemenov — v13; dva nové tímy — v13.)
+
+## Anglické mená (schválené 2026-08-02, pre budúcu EN verziu)
+Názov hry ELEMEN ostáva. Mená overené, aby sa nepodobali na skutočných
+Pokémonov. Tímy: Sopečný = Volcano Team, Oceánsky = Ocean Team,
+Lesný = Forest Team, Ľadový = Ice Team.
+
+- Volcano: Plamienko=Flamekit, Sopúšik=Volcub, Hríbik=Mushkin,
+  Iskrík=Zappet, Perlík=Pearlypus
+- Ocean: Kvapko=Dripple, Žabko=Hopdrop, Lístko=Sprigtail, Búrko=Stormwing,
+  Uhlík=Emberling
+- Evolúcie pôvodných tímov: Ohnivec=Flamefang→Ohňodrak=Firedrake,
+  Iskrák=Zapster→Hromoborec=Thunderroar, Kvapkáč=Wavesnap→Vlnobijec=Wavebreaker,
+  Lístovec=Leafraptor→Pralesák=Junglesaur
+- Forest: Ostrík=Prickleaf, Kvetko=Budling, Svetluška=Glowbug,
+  Potápko=Divebill, Žeravík=Embercoil; Motýlik=Flutterbloom→Krídlokvet=Petalwing,
+  Blyskoták=Thunderhoot→Búrkokrídlo=Boltwing
+- Ice: Mrazík=Chillguin, Machko=Mossbear, Ohnivko=Sizzleclaw,
+  Bleskonoh=Boltstripe, Vlnka=Wavelet; Ľadovec=Frostfin→Mrazivec=Blizzardclaw,
+  Búrkonoh=Stormgallop→Hromokôň=Thunderhorn
+- Traineri: Lekárnička=Medkit, Profesorka=Professor, Odvolanie=Recall,
+  Super energia=Super Energy
 
 ## Štýl komunikácie s používateľom
 Marian nie je programátor — hovoriť ľudsky, po slovensky, bez žargónu.
